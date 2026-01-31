@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html, body { margin:0; background:transparent; overflow:hidden; }
+
+    :root{
+      --icon-h: 500px;
+      --bottom: 40px;
+
+      --scale-normal: 0.72;
+      --scale-ice: 0.40;
+
+      --icon-gap: 5px;
+
+      --pill-pad: 10px;
+      --border: 6px;
+
+      /* 50% more transparent */
+      --pill-bg: rgba(25,25,28,0.29);
+
+      --page-ms: 8000ms;
+
+      --fade-ms: 520ms;
+      --slide: 26px;
+    }
+
+    #wrap{
+      position: fixed;
+      left:0; right:0;
+      bottom: var(--bottom);
+      height: calc((var(--icon-h) * var(--scale-normal)) + (var(--pill-pad) * 2) + (var(--border) * 2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      overflow:hidden;
+    }
+
+    #pillOuter{
+      position: relative;
+      display:inline-block;
+      border-radius: 999px;
+      padding: var(--border);
+    }
+
+    /* ===== NEON BORDER (pink & blue swapped + seamless conic) ===== */
+    #pillBorder{
+      position:absolute;
+      inset:0;
+      border-radius:999px;
+      pointer-events:none;
+
+      background: conic-gradient(
+        from 0deg,
+        rgba(180, 70, 255, 0.95),  /* purple */
+        rgba(80, 220, 255, 0.95),  /* blue (swapped earlier) */
+        rgba(255, 70, 190, 0.95),  /* pink (swapped later) */
+        rgba(180, 70, 255, 0.95)
+      );
+
+      box-shadow:
+        0 18px 50px rgba(0,0,0,0.28),
+        0 0 18px rgba(180, 70, 255, 0.22),
+        0 0 22px rgba(255, 70, 190, 0.18),
+        0 0 18px rgba(80, 220, 255, 0.16);
+
+      filter: grayscale(1) saturate(0) brightness(1.05);
+      will-change: filter;
+    }
+
+    #pillOuter.fill #pillBorder{
+      animation: colorizeBorder var(--page-ms) linear forwards;
+    }
+
+    @keyframes colorizeBorder{
+      0%   { filter: grayscale(1) saturate(0) brightness(1.05); }
+      100% { filter: grayscale(0) saturate(1) brightness(1.00); }
+    }
+
+    #pillInner{
+      position: relative;
+      border-radius: 999px;
+      background: var(--pill-bg);
+      padding: var(--pill-pad);
+      overflow:hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.10),
+        inset 0 -1px 0 rgba(0,0,0,0.22);
+    }
+
+    #pillInner::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:999px;
+      pointer-events:none;
+      opacity:0.10;
+      background-image: radial-gradient(rgba(255,255,255,0.22) 1px, transparent 1px);
+      background-size: 10px 10px;
+      z-index: 1;
+    }
+
+    .page{
+      position:absolute;
+      left:0; top:50%;
+      transform: translate3d(var(--slide), -50%, 0);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: var(--icon-gap);
+      white-space: nowrap;
+      opacity:0;
+      z-index: 2;
+      will-change: opacity, transform;
+      backface-visibility: hidden;
+      transition:
+        opacity var(--fade-ms) ease,
+        transform var(--fade-ms) cubic-bezier(.2,.9,.2,1);
+    }
+
+    .page.active{
+      position:relative;
+      left:auto; top:auto;
+      transform: translate3d(0, 0, 0);
+      opacity:1;
+    }
+
+    .page.out{
+      transform: translate3d(calc(var(--slide) * -1), -50%, 0);
+      opacity:0;
+    }
+
+    .page img{
+      height: calc(var(--icon-h) * var(--scale-normal));
+      width:auto;
+      display:block;
+      margin:0;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.55));
+    }
+
+    .page img[data-name="icecream.png"]{
+      height: calc(var(--icon-h) * var(--scale-ice));
+    }
+  </style>
+</head>
+
+<body>
+  <div id="wrap">
+    <div id="pillOuter">
+      <div id="pillBorder"></div>
+      <div id="pillInner"></div>
+    </div>
+  </div>
+
+  <script>
+    const V_IMG = 1;
+    const PAGE_MS = 8000;
+
+    // All your images from your first message (unchanged list)
+    const files = [
+      "rose.png","gg.png","icecream.png","tiktok.png","slay.png","fingerheart.png",
+      "peach.png","tofu.png","boxing.png","rosa.png","friendship.png",
+      "perfume.png","flowers.png","doughnut.png","papercrane.png",
+      "crown.png","confetti.png","hat.png","sunglasses.png","crab.png","boxinggloves.png",
+      "teddybear.png","leon.png",
+      "heartme.png","fireworks.png","car.png"
+    ];
+
+    function chunk(arr, size){
+      const out = [];
+      for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+      return out;
+    }
+
+    const pages = chunk(files, 6);
+
+    const pillOuter = document.getElementById("pillOuter");
+    const pillBorder = document.getElementById("pillBorder");
+    const inner = document.getElementById("pillInner");
+
+    // Fallback loader ONLY if a file fails (helps with heartme missing due to case/extension)
+    function attachFallback(img, name){
+      const base = name.replace(/\.[^.]+$/, "");         // "heartme"
+      const ext  = (name.match(/\.([^.]+)$/) || ["","png"])[1].toLowerCase();
+
+      // Try common variants (case + extension). Keeps visuals identical if original exists.
+      const candidates = [
+        name,
+        base + "." + ext.toUpperCase(),   // heartme.PNG
+        base + ".png",
+        base + ".PNG",
+        base + ".jpg",
+        base + ".JPG",
+        base + ".jpeg",
+        base + ".JPEG",
+        base + ".webp",
+        base + ".WEBP"
+      ];
+
+      let k = 0;
+      img.onerror = () => {
+        k++;
+        if (k >= candidates.length) {
+          console.warn("Missing image:", name, "Tried:", candidates.map(c => "images/" + c));
+          // hide broken icon so layout stays clean
+          img.style.display = "none";
+          return;
+        }
+        img.src = "images/" + candidates[k] + "?v=" + V_IMG;
+      };
+    }
+
+    function buildPage(list, isActive){
+      const page = document.createElement("div");
+      page.className = "page" + (isActive ? " active" : "");
+
+      list.forEach(name => {
+        const img = document.createElement("img");
+        img.alt = name;
+        img.decoding = "async";
+        img.loading = "eager";
+        img.setAttribute("data-name", name);
+
+        attachFallback(img, name);
+        img.src = "images/" + name + "?v=" + V_IMG;
+
+        page.appendChild(img);
+      });
+
+      inner.appendChild(page);
+      return page;
+    }
+
+    const pageEls = pages.map((p, i) => buildPage(p, i === 0));
+    let idx = 0;
+
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    function restartFill(){
+      pillOuter.classList.remove("fill");
+      pillBorder.style.animation = "none";
+      void pillBorder.offsetHeight;
+      pillBorder.style.animation = "";
+      pillOuter.classList.add("fill");
+    }
+
+    async function cycle(){
+      while(true){
+        restartFill();
+        await sleep(PAGE_MS);
+
+        const cur = pageEls[idx];
+        const nextIdx = (idx + 1) % pageEls.length;
+        const next = pageEls[nextIdx];
+
+        cur.classList.add("out");
+        cur.classList.remove("active");
+
+        next.classList.add("active");
+        next.classList.remove("out");
+
+        setTimeout(() => cur.classList.remove("out"), 700);
+        idx = nextIdx;
+      }
+    }
+
+    cycle();
+  </script>
+</body>
+</html>
