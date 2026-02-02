@@ -18,7 +18,6 @@
       --pill-pad: 10px;
       --border: 6px;
 
-      /* Dark ember glass */
       --pill-bg: rgba(35, 5, 5, 0.45);
 
       --page-ms: 8000ms;
@@ -46,7 +45,6 @@
       padding: var(--border);
     }
 
-    /* 🔥 FIRE BORDER */
     #pillBorder{
       position:absolute;
       inset:0;
@@ -91,7 +89,6 @@
         inset 0 -1px 0 rgba(0,0,0,0.4);
     }
 
-    /* Warm ember speckle instead of white dots */
     #pillInner::before{
       content:"";
       position:absolute;
@@ -145,6 +142,11 @@
     .page img[data-name="icecream.png"]{
       height: calc(var(--icon-h) * var(--scale-ice));
     }
+
+    /* 🥯 Bagel 15% smaller */
+    .page img[data-name="bagel.png"]{
+      height: calc(var(--icon-h) * var(--scale-normal) * 0.85);
+    }
   </style>
 </head>
 
@@ -163,10 +165,10 @@
     const files = [
       "rose.png","gg.png","icecream.png","tiktok.png","slay.png","fingerheart.png",
       "peach.png","tofu.png","boxing.png","rosa.png","friendship.png",
-      "perfume.png","flowers.png","doughnut.png","papercrane.png",
-      "crown.png","confetti.png","hat.png","sunglasses.png","crab.png","boxinggloves.png",
-      "teddybear.png","leon.png",
-      "heartme.png","fireworks.png","car.png"
+      "perfume.png","flowers.png","doughnut.png","bagel.png","papercrane.png",
+      "crown.png","confetti.png","hat.png","sunglasses.png","crab.png",
+      "boxinggloves.png","teddybear.png","leon.png",
+      "heartme.png","random.png","sign.png","superfan.png","fireworks.png","car.png"
     ];
 
     function chunk(arr, size){
@@ -252,4 +254,3 @@
   </script>
 </body>
 </html>
-
