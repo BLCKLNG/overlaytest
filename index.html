@@ -5,162 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     html, body { margin:0; background:transparent; overflow:hidden; }
+    * { box-sizing:border-box; }
 
     :root{
-      --icon-h: 500px;
       --bottom: 40px;
 
-      --scale-normal: 0.72;
-      --scale-ice: 0.40;
+      --carpet-w: 1080px;
+      --carpet-h: 180px;
+      --carpet-radius: 40px;
 
-      --icon-gap: 5px;
+      /* PNG layout */
+      --pad-x: 60px;
+      --gap: 28px;
+      --icon-h: 143px;
 
-      --pill-pad: 10px;
-      --border: 6px;
-
-      --pill-bg: rgba(35, 5, 5, 0.45);
-
-      --page-ms: 8000ms;
-
-      --fade-ms: 520ms;
-      --slide: 26px;
+      /* timing */
+      --fade-ms: 1000ms;
+      --idle-ms: 6000ms;
     }
 
     #wrap{
       position: fixed;
-      left:0; right:0;
+      left: 0; right: 0;
       bottom: var(--bottom);
-      height: calc((var(--icon-h) * var(--scale-normal)) + (var(--pill-pad) * 2) + (var(--border) * 2));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      pointer-events:none;
-      overflow:hidden;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
     }
 
-    #pillOuter{
+    #carpet{
       position: relative;
-      display:inline-block;
-      border-radius: 999px;
-      padding: var(--border);
-    }
+      width: min(var(--carpet-w), 100vw);
+      height: var(--carpet-h);
+      border-radius: var(--carpet-radius);
 
-    #pillBorder{
-      position:absolute;
-      inset:0;
-      border-radius:999px;
-      pointer-events:none;
-
-      background: conic-gradient(
-        from 0deg,
-        #ffb347,
-        #ff5a00,
-        #ff2a00,
-        #b30000,
-        #ffb347
+      /* 🍷 Burgundy base */
+      background: linear-gradient(
+        180deg,
+        #7a0f1f 0%,
+        #5a0c17 45%,
+        #3d0810 100%
       );
 
+      /* ✨ Thicker gold outline (120% thicker) */
+      border: 4.5px solid #d4af37;
+
+      /* soft luxury glow */
       box-shadow:
-        0 18px 50px rgba(0,0,0,0.35),
-        0 0 20px rgba(255,120,0,0.45),
-        0 0 28px rgba(255,60,0,0.35);
+        0 0 22px rgba(120, 0, 40, 0.45),
+        0 0 60px rgba(60, 0, 20, 0.35);
 
-      filter: grayscale(1) saturate(0) brightness(1.05);
-      will-change: filter;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: var(--pad-x);
+      padding-right: var(--pad-x);
     }
 
-    #pillOuter.fill #pillBorder{
-      animation: colorizeBorder var(--page-ms) linear forwards;
-    }
-
-    @keyframes colorizeBorder{
-      0%   { filter: grayscale(1) saturate(0) brightness(1.05); }
-      100% { filter: grayscale(0) saturate(1) brightness(1.00); }
-    }
-
-    #pillInner{
-      position: relative;
-      border-radius: 999px;
-      background: var(--pill-bg);
-      padding: var(--pill-pad);
-      overflow:hidden;
-      box-shadow:
-        inset 0 1px 0 rgba(255,180,80,0.18),
-        inset 0 -1px 0 rgba(0,0,0,0.4);
-    }
-
-    #pillInner::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius:999px;
-      pointer-events:none;
-      opacity:0.12;
-      background-image: radial-gradient(rgba(255,120,40,0.35) 1px, transparent 1px);
-      background-size: 10px 10px;
-      z-index: 1;
-    }
-
-    .page{
-      position:absolute;
-      left:0; top:50%;
-      transform: translate3d(var(--slide), -50%, 0);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: var(--icon-gap);
+    #icons{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--gap);
       white-space: nowrap;
-      opacity:0;
-      z-index: 2;
-      will-change: opacity, transform;
-      backface-visibility: hidden;
-      transition:
-        opacity var(--fade-ms) ease,
-        transform var(--fade-ms) cubic-bezier(.2,.9,.2,1);
-    }
 
-    .page.active{
-      position:relative;
-      left:auto; top:auto;
-      transform: translate3d(0, 0, 0);
-      opacity:1;
+      opacity: 1;
+      transition: opacity var(--fade-ms) linear;
+      will-change: opacity;
     }
+    #icons.out{ opacity: 0; }
 
-    .page.out{
-      transform: translate3d(calc(var(--slide) * -1), -50%, 0);
-      opacity:0;
-    }
-
-    .page img{
-      height: calc(var(--icon-h) * var(--scale-normal));
-      width:auto;
-      display:block;
-      margin:0;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.65));
-    }
-
-    .page img[data-name="icecream.png"]{
-      height: calc(var(--icon-h) * var(--scale-ice));
-    }
-
-    /* 🥯 Bagel 15% smaller */
-    .page img[data-name="bagel.png"]{
-      height: calc(var(--icon-h) * var(--scale-normal) * 0.85);
+    #icons img{
+      height: var(--icon-h);
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.6));
     }
   </style>
 </head>
 
 <body>
   <div id="wrap">
-    <div id="pillOuter">
-      <div id="pillBorder"></div>
-      <div id="pillInner"></div>
+    <div id="carpet">
+      <div id="icons"></div>
     </div>
   </div>
 
   <script>
     const V_IMG = 1;
-    const PAGE_MS = 8000;
 
     const files = [
       "rose.png","gg.png","icecream.png","tiktok.png","slay.png","fingerheart.png",
@@ -171,17 +103,19 @@
       "heartme.png","random.png","sign.png","superfan.png","fireworks.png","car.png"
     ];
 
+    const FADE_MS = 1000;
+    const IDLE_MS = 6000;
+
+    const iconsEl = document.getElementById("icons");
+
     function chunk(arr, size){
       const out = [];
       for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
       return out;
     }
-
     const pages = chunk(files, 6);
 
-    const pillOuter = document.getElementById("pillOuter");
-    const pillBorder = document.getElementById("pillBorder");
-    const inner = document.getElementById("pillInner");
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
     function attachFallback(img, name){
       const base = name.replace(/\.[^.]+$/, "");
@@ -199,58 +133,51 @@
       };
     }
 
-    function buildPage(list, isActive){
-      const page = document.createElement("div");
-      page.className = "page" + (isActive ? " active" : "");
+    async function preloadImages(){
+      const uniq = [...new Set(files)];
+      await Promise.all(uniq.map(name => {
+        const img = new Image();
+        attachFallback(img, name);
+        img.src = "images/" + name + "?v=" + V_IMG;
+        return img.decode ? img.decode().catch(()=>{}) : Promise.resolve();
+      }));
+    }
 
-      list.forEach(name => {
+    function renderPage(list){
+      iconsEl.innerHTML = "";
+      for (const name of list){
         const img = document.createElement("img");
         img.alt = name;
         img.decoding = "async";
         img.loading = "eager";
-        img.setAttribute("data-name", name);
         attachFallback(img, name);
         img.src = "images/" + name + "?v=" + V_IMG;
-        page.appendChild(img);
-      });
-
-      inner.appendChild(page);
-      return page;
-    }
-
-    const pageEls = pages.map((p, i) => buildPage(p, i === 0));
-    let idx = 0;
-    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-    function restartFill(){
-      pillOuter.classList.remove("fill");
-      pillBorder.style.animation = "none";
-      void pillBorder.offsetHeight;
-      pillBorder.style.animation = "";
-      pillOuter.classList.add("fill");
-    }
-
-    async function cycle(){
-      while(true){
-        restartFill();
-        await sleep(PAGE_MS);
-
-        const cur = pageEls[idx];
-        const nextIdx = (idx + 1) % pageEls.length;
-        const next = pageEls[nextIdx];
-
-        cur.classList.add("out");
-        cur.classList.remove("active");
-
-        next.classList.add("active");
-        next.classList.remove("out");
-
-        setTimeout(() => cur.classList.remove("out"), 700);
-        idx = nextIdx;
+        iconsEl.appendChild(img);
       }
     }
 
-    cycle();
+    async function cycle(){
+      let idx = 0;
+      renderPage(pages[idx]);
+
+      while(true){
+        await sleep(IDLE_MS);
+
+        iconsEl.classList.add("out");
+        await sleep(FADE_MS);
+
+        idx = (idx + 1) % pages.length;
+        renderPage(pages[idx]);
+
+        requestAnimationFrame(() => iconsEl.classList.remove("out"));
+        await sleep(FADE_MS);
+      }
+    }
+
+    (async function init(){
+      await preloadImages();
+      cycle();
+    })();
   </script>
 </body>
 </html>
