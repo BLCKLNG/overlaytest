@@ -2,12 +2,17 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=1920, height=1080, initial-scale=1" />
   <style>
     html, body { margin:0; background:transparent; overflow:hidden; }
     * { box-sizing:border-box; }
 
     :root{
+      /* ===== canvas ===== */
+      --canvas-w: 1920px;
+      --canvas-h: 1080px;
+
+      /* layout */
       --bottom: 40px;
 
       --carpet-w: 1080px;
@@ -22,10 +27,19 @@
       /* timing */
       --fade-ms: 1000ms;
       --idle-ms: 6000ms;
+
+      --gold: #d4af37;
+    }
+
+    /* Lock the document to a real canvas size (no transforms) */
+    body{
+      width: var(--canvas-w);
+      height: var(--canvas-h);
+      position: relative;
     }
 
     #wrap{
-      position: fixed;
+      position: absolute;
       left: 0; right: 0;
       bottom: var(--bottom);
       display: flex;
@@ -35,11 +49,10 @@
 
     #carpet{
       position: relative;
-      width: min(var(--carpet-w), 100vw);
+      width: var(--carpet-w);
       height: var(--carpet-h);
       border-radius: var(--carpet-radius);
 
-      /* 🍷 Burgundy base */
       background: linear-gradient(
         180deg,
         #7a0f1f 0%,
@@ -47,10 +60,8 @@
         #3d0810 100%
       );
 
-      /* ✨ Thicker gold outline (120% thicker) */
-      border: 4.5px solid #d4af37;
+      border: 4.5px solid var(--gold);
 
-      /* soft luxury glow */
       box-shadow:
         0 0 22px rgba(120, 0, 40, 0.45),
         0 0 60px rgba(60, 0, 20, 0.35);
@@ -79,7 +90,15 @@
       height: var(--icon-h);
       width: auto;
       display: block;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.6));
+
+      /* make edges pop a bit more on phones */
+      filter:
+        drop-shadow(0 10px 18px rgba(0,0,0,0.60))
+        drop-shadow(0 0 10px rgba(0,0,0,0.25));
+
+      /* avoid some embedded-browser blur quirks */
+      backface-visibility: hidden;
+      transform: translateZ(0);
     }
   </style>
 </head>
