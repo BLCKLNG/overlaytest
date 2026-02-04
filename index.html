@@ -2,27 +2,27 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=1920, height=1080, initial-scale=1" />
+  <meta name="viewport" content="width=3840, height=2160, initial-scale=1" />
   <style>
     html, body { margin:0; background:transparent; overflow:hidden; }
     * { box-sizing:border-box; }
 
     :root{
-      /* ===== canvas ===== */
-      --canvas-w: 1920px;
-      --canvas-h: 1080px;
+      /* ===== 4K canvas ===== */
+      --canvas-w: 3840px;
+      --canvas-h: 2160px;
 
       /* layout */
-      --bottom: 40px;
+      --bottom: 80px;              /* doubled for 4K */
 
-      --carpet-w: 1080px;
-      --carpet-h: 180px;
-      --carpet-radius: 40px;
+      --carpet-w: 2160px;          /* doubled */
+      --carpet-h: 360px;           /* doubled */
+      --carpet-radius: 80px;       /* doubled */
 
       /* PNG layout */
-      --pad-x: 60px;
-      --gap: 28px;
-      --icon-h: 143px;
+      --pad-x: 120px;              /* doubled */
+      --gap: 56px;                 /* doubled */
+      --icon-h: 286px;             /* doubled */
 
       /* timing */
       --fade-ms: 1000ms;
@@ -31,7 +31,6 @@
       --gold: #d4af37;
     }
 
-    /* Lock the document to a real canvas size (no transforms) */
     body{
       width: var(--canvas-w);
       height: var(--canvas-h);
@@ -60,11 +59,10 @@
         #3d0810 100%
       );
 
-      border: 4.5px solid var(--gold);
-
+      border: 9px solid var(--gold); /* scaled */
       box-shadow:
-        0 0 22px rgba(120, 0, 40, 0.45),
-        0 0 60px rgba(60, 0, 20, 0.35);
+        0 0 44px rgba(120, 0, 40, 0.45),
+        0 0 120px rgba(60, 0, 20, 0.35);
 
       display: flex;
       align-items: center;
@@ -91,12 +89,10 @@
       width: auto;
       display: block;
 
-      /* make edges pop a bit more on phones */
       filter:
-        drop-shadow(0 10px 18px rgba(0,0,0,0.60))
-        drop-shadow(0 0 10px rgba(0,0,0,0.25));
+        drop-shadow(0 20px 36px rgba(0,0,0,0.65))
+        drop-shadow(0 0 20px rgba(0,0,0,0.35));
 
-      /* avoid some embedded-browser blur quirks */
       backface-visibility: hidden;
       transform: translateZ(0);
     }
