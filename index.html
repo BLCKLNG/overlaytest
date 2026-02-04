@@ -2,27 +2,27 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=3840, height=2160, initial-scale=1" />
+  <meta name="viewport" content="width=2560, height=1440, initial-scale=1" />
   <style>
     html, body { margin:0; background:transparent; overflow:hidden; }
     * { box-sizing:border-box; }
 
     :root{
-      /* ===== 4K canvas ===== */
-      --canvas-w: 3840px;
-      --canvas-h: 2160px;
+      /* ===== 1440p canvas ===== */
+      --canvas-w: 2560px;
+      --canvas-h: 1440px;
 
-      /* layout */
-      --bottom: 80px;              /* doubled for 4K */
+      /* layout (scaled from 1080p x 1.333...) */
+      --bottom: 53px;
 
-      --carpet-w: 2160px;          /* doubled */
-      --carpet-h: 360px;           /* doubled */
-      --carpet-radius: 80px;       /* doubled */
+      --carpet-w: 1440px;
+      --carpet-h: 240px;
+      --carpet-radius: 53px;
 
       /* PNG layout */
-      --pad-x: 120px;              /* doubled */
-      --gap: 56px;                 /* doubled */
-      --icon-h: 286px;             /* doubled */
+      --pad-x: 80px;
+      --gap: 37px;
+      --icon-h: 190px;
 
       /* timing */
       --fade-ms: 1000ms;
@@ -59,10 +59,11 @@
         #3d0810 100%
       );
 
-      border: 9px solid var(--gold); /* scaled */
+      border: 6px solid var(--gold);
+
       box-shadow:
-        0 0 44px rgba(120, 0, 40, 0.45),
-        0 0 120px rgba(60, 0, 20, 0.35);
+        0 0 30px rgba(120, 0, 40, 0.45),
+        0 0 80px rgba(60, 0, 20, 0.35);
 
       display: flex;
       align-items: center;
@@ -90,8 +91,8 @@
       display: block;
 
       filter:
-        drop-shadow(0 20px 36px rgba(0,0,0,0.65))
-        drop-shadow(0 0 20px rgba(0,0,0,0.35));
+        drop-shadow(0 14px 24px rgba(0,0,0,0.65))
+        drop-shadow(0 0 14px rgba(0,0,0,0.30));
 
       backface-visibility: hidden;
       transform: translateZ(0);
