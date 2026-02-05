@@ -12,17 +12,18 @@
       --canvas-w: 2560px;
       --canvas-h: 1440px;
 
-      /* layout (scaled from 1080p x 1.333...) */
+      /* layout */
       --bottom: 53px;
 
+      /* carpet (width will be set by JS to make 40px side space on widest page) */
       --carpet-w: 1440px;
       --carpet-h: 240px;
       --carpet-radius: 53px;
 
-      /* PNG layout */
-      --pad-x: 80px;
-      --gap: 37px;
-      --icon-h: 190px;
+      /* keep your CURRENT perfect sizing */
+      --pad-x: 40px;
+      --gap: 24px;
+      --icon-h: 200px;
 
       /* timing */
       --fade-ms: 1000ms;
@@ -110,32 +111,23 @@
   <script>
     const V_IMG = 1;
 
-    // NOTE: "capybara.png" is intentionally placed between doughnut.png and bagel.png
-    // and we keep all pages at 6 icons except that specific page which has 7.
     const pages = [
-      // page 1 (6)
-      ["rose.png","gg.png","icecream.png","tiktok.png","slay.png","fingerheart.png"],
-
-      // page 2 (6)
-      ["peach.png","tofu.png","boxing.png","rosa.png","friendship.png","perfume.png"],
-
-      // page 3 (SPECIAL: 7) — doughnut + capybara + bagel together
-      ["flowers.png","doughnut.png","capybara.png","bagel.png","papercrane.png","crown.png","confetti.png"],
-
-      // page 4 (6)
-      ["hat.png","sunglasses.png","crab.png","boxinggloves.png","teddybear.png","leon.png"],
-
-      // page 5 (6)
-      ["heartme.png","random.png","sign.png","superfan.png","fireworks.png","car.png"]
+      ["rose.png","icecream.png","gg.png","tiktok.png","fingerheart.png"],
+      ["tofu.png","peach.png","rosa.png","diny.png","boxing.png"],
+      ["friendship.png","flowers.png","perfume.png","doughnut.png","jar.png"],
+      ["bagel.png","hat.png","papercrane.png","crown.png","confetti.png"],
+      ["crab.png","sunglasses.png","boxinggloves.png","teddybear.png","leon.png"],
+      ["random.png","sign.png","superfan.png","heartme.png","flamingo.png"],
+      ["fireworks.png","car.png","star.png","band.png","scene.png"]
     ];
 
-    // Used for preloading + cache-busting fallback logic.
     const files = pages.flat();
 
     const FADE_MS = 1000;
     const IDLE_MS = 6000;
 
     const iconsEl = document.getElementById("icons");
+    const carpetEl = document.getElementById("carpet");
 
     const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -167,16 +159,6 @@
 
     function renderPage(list){
       iconsEl.innerHTML = "";
-
-      // Slightly shrink only on the 7-icon page
-      if (list.length === 7){
-        iconsEl.style.setProperty("--icon-h", "170px");
-        iconsEl.style.setProperty("--gap", "30px");
-      } else {
-        iconsEl.style.setProperty("--icon-h", "190px");
-        iconsEl.style.setProperty("--gap", "37px");
-      }
-
       for (const name of list){
         const img = document.createElement("img");
         img.alt = name;
@@ -186,6 +168,22 @@
         img.src = "images/" + name + "?v=" + V_IMG;
         iconsEl.appendChild(img);
       }
+    }
+
+    async function setCarpetWidthFor40pxSides(){
+      // Measure widest page with CURRENT fixed sizes
+      let widest = 0;
+
+      for (const page of pages){
+        renderPage(page);
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        widest = Math.max(widest, iconsEl.scrollWidth);
+      }
+
+      // Carpet outer width should be widest + 80px (40px each side)
+      const target = Math.ceil(widest + 80);
+
+      carpetEl.style.width = target + "px";
     }
 
     async function cycle(){
@@ -208,6 +206,7 @@
 
     (async function init(){
       await preloadImages();
+      await setCarpetWidthFor40pxSides(); // locks 40px side space on widest page
       cycle();
     })();
   </script>
