@@ -71,6 +71,7 @@
       justify-content: center;
       padding-left: var(--pad-x);
       padding-right: var(--pad-x);
+      overflow: hidden;
     }
 
     #icons{
@@ -84,6 +85,7 @@
       transition: opacity var(--fade-ms) linear;
       will-change: opacity;
     }
+
     #icons.out{ opacity: 0; }
 
     #icons img{
@@ -98,6 +100,71 @@
       backface-visibility: hidden;
       transform: translateZ(0);
     }
+
+    .discord-page{
+      width: 100%;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .discord-logo{
+      height: 150px;
+      width: auto;
+      display: block;
+
+      filter:
+        drop-shadow(0 0 10px rgba(212,175,55,0.65))
+        drop-shadow(0 0 24px rgba(212,175,55,0.35))
+        drop-shadow(0 10px 18px rgba(0,0,0,0.55));
+    }
+
+    .discord-text{
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .discord-title,
+    .discord-link{
+      color: var(--gold);
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .discord-title{
+      font-size: 70px;
+      letter-spacing: 3px;
+      margin-bottom: 14px;
+
+      text-shadow:
+        0 0 8px rgba(212,175,55,0.85),
+        0 0 18px rgba(212,175,55,0.65),
+        0 0 34px rgba(212,175,55,0.38),
+        0 4px 12px rgba(0,0,0,0.85);
+    }
+
+    .discord-link{
+      width: 100%;
+      font-size: 35px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
+      text-transform: none;
+
+      text-shadow:
+        0 0 10px rgba(212,175,55,0.95),
+        0 0 22px rgba(212,175,55,0.78),
+        0 0 42px rgba(212,175,55,0.48),
+        0 4px 14px rgba(0,0,0,0.90);
+    }
   </style>
 </head>
 
@@ -111,9 +178,6 @@
   <script>
     const V_IMG = 1;
 
-    // capybara.png removed
-    // swan.png added right before flamingo.png
-    // order preserved otherwise, still 5 per page
     const pages = [
       ["rose.png","icecream.png","gg.png","tiktok.png","fingerheart.png"],
       ["tofu.png","peach.png","rosa.png","diny.png","boxing.png"],
@@ -121,10 +185,20 @@
       ["hat.png","papercrane.png","crown.png","confetti.png","crab.png"],
       ["sunglasses.png","boxinggloves.png","teddybear.png","leon.png","random.png"],
       ["sign.png","superfan.png","heartme.png","swan.png","flamingo.png"],
-      ["fireworks.png","car.png","star.png","band.png","scene.png"]
+      ["fireworks.png","car.png","star.png","band.png","scene.png"],
+      {
+        type: "discord",
+        title: "join discord",
+        link: "https://discord.gg/TXUBQnpbJH",
+        logo: "discord.png"
+      }
     ];
 
-    const files = pages.flat();
+    const imageFiles = pages.flatMap(page => {
+      if (Array.isArray(page)) return page;
+      if (page.type === "discord") return [page.logo];
+      return [];
+    });
 
     const FADE_MS = 1000;
     const IDLE_MS = 6000;
@@ -138,43 +212,102 @@
       const base = name.replace(/\.[^.]+$/, "");
       const ext  = (name.match(/\.([^.]+)$/) || ["","png"])[1].toLowerCase();
       const candidates = [
-        name, base + "." + ext.toUpperCase(), base + ".png", base + ".PNG",
-        base + ".jpg", base + ".JPG", base + ".jpeg", base + ".JPEG",
+        name,
+        base + "." + ext.toUpperCase(),
+        base + ".png", base + ".PNG",
+        base + ".jpg", base + ".JPG",
+        base + ".jpeg", base + ".JPEG",
         base + ".webp", base + ".WEBP"
       ];
+
       let k = 0;
       img.onerror = () => {
         k++;
-        if (k >= candidates.length) { img.style.display = "none"; return; }
+        if (k >= candidates.length) {
+          img.style.display = "none";
+          return;
+        }
         img.src = "images/" + candidates[k] + "?v=" + V_IMG;
       };
     }
 
     async function preloadImages(){
-      const uniq = [...new Set(files)];
+      const uniq = [...new Set(imageFiles)];
       await Promise.all(uniq.map(name => {
         const img = new Image();
         attachFallback(img, name);
         img.src = "images/" + name + "?v=" + V_IMG;
-        return img.decode ? img.decode().catch(()=>{}) : Promise.resolve();
+        return img.decode ? img.decode().catch(() => {}) : Promise.resolve();
       }));
     }
 
-    function renderPage(list){
+    function makeDiscordLogo(srcName){
+      const img = document.createElement("img");
+      img.className = "discord-logo";
+      img.alt = "Discord";
+      img.decoding = "async";
+      img.loading = "eager";
+      attachFallback(img, srcName);
+      img.src = "images/" + srcName + "?v=" + V_IMG;
+      return img;
+    }
+
+    function renderPage(page){
       iconsEl.innerHTML = "";
-      for (const name of list){
-        const img = document.createElement("img");
-        img.alt = name;
-        img.decoding = "async";
-        img.loading = "eager";
-        attachFallback(img, name);
-        img.src = "images/" + name + "?v=" + V_IMG;
-        iconsEl.appendChild(img);
+
+      if (Array.isArray(page)){
+        iconsEl.style.display = "flex";
+        iconsEl.style.width = "auto";
+        iconsEl.style.gap = "var(--gap)";
+        iconsEl.style.whiteSpace = "nowrap";
+
+        for (const name of page){
+          const img = document.createElement("img");
+          img.alt = name;
+          img.decoding = "async";
+          img.loading = "eager";
+          attachFallback(img, name);
+          img.src = "images/" + name + "?v=" + V_IMG;
+          iconsEl.appendChild(img);
+        }
+        return;
+      }
+
+      if (page.type === "discord"){
+        iconsEl.style.display = "flex";
+        iconsEl.style.width = "100%";
+        iconsEl.style.gap = "0";
+        iconsEl.style.whiteSpace = "normal";
+
+        const box = document.createElement("div");
+        box.className = "discord-page";
+
+        const logoLeft = makeDiscordLogo(page.logo);
+        const logoRight = makeDiscordLogo(page.logo);
+
+        const textWrap = document.createElement("div");
+        textWrap.className = "discord-text";
+
+        const title = document.createElement("div");
+        title.className = "discord-title";
+        title.textContent = page.title;
+
+        const link = document.createElement("div");
+        link.className = "discord-link";
+        link.textContent = page.link;
+
+        textWrap.appendChild(title);
+        textWrap.appendChild(link);
+
+        box.appendChild(logoLeft);
+        box.appendChild(textWrap);
+        box.appendChild(logoRight);
+
+        iconsEl.appendChild(box);
       }
     }
 
     async function setCarpetWidthFor40pxSides(){
-      // Measure widest page with CURRENT fixed sizes
       let widest = 0;
 
       for (const page of pages){
@@ -183,9 +316,7 @@
         widest = Math.max(widest, iconsEl.scrollWidth);
       }
 
-      // Carpet outer width should be widest + 80px (40px each side)
       const target = Math.ceil(widest + 80);
-
       carpetEl.style.width = target + "px";
     }
 
@@ -193,7 +324,7 @@
       let idx = 0;
       renderPage(pages[idx]);
 
-      while(true){
+      while (true){
         await sleep(IDLE_MS);
 
         iconsEl.classList.add("out");
@@ -209,7 +340,7 @@
 
     (async function init(){
       await preloadImages();
-      await setCarpetWidthFor40pxSides(); // locks 40px side space on widest page
+      await setCarpetWidthFor40pxSides();
       cycle();
     })();
   </script>
